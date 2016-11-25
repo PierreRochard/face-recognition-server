@@ -1,51 +1,37 @@
+import logging
 import os
 import sys
+
 import cv2
 import numpy as np
-import logging
-import shutil
 
-from peewee import SqliteDatabase, Model, CharField, ForeignKeyField
-
-MODEL_FILE = "model.mdl"
+from config import MODEL_FILE
+from models import Label, Image
 
 
-def detect(img, cascade):
-    gray = to_grayscale(img)
-    rects = cascade.detectMultiScale(gray,
-                                     scaleFactor=1.3,
-                                     minNeighbors=4,
-                                     minSize=(30, 30),
-                                     flags=cv2.CASCADE_SCALE_IMAGE)
-
-    if len(rects) == 0:
-        return []
-    return rects
-
-
-def detect_faces(img):
+def detect_faces(image):
     cascade = cv2.CascadeClassifier("data/haarcascade_frontalface_alt.xml")
-    return detect(img, cascade)
+    grayscale_image = to_grayscale(image)
+    rectangles = cascade.detectMultiScale(grayscale_image,
+                                          scaleFactor=1.3,
+                                          minNeighbors=4,
+                                          minSize=(30, 30),
+                                          flags=cv2.CASCADE_SCALE_IMAGE)
+    if len(rectangles) == 0:
+        return []
+    return rectangles
 
 
-def to_grayscale(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+def to_grayscale(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     gray = cv2.equalizeHist(gray)
     return gray
 
 
-def contains_face(img):
-    return len(detect_faces(img)) > 0
-
-
-def save(path, img):
-    cv2.imwrite(path, img)
-
-
-def crop_faces(img, faces):
+def crop_faces(image, faces):
     for face in faces:
         x, y, h, w = [result for result in face]
-        return img[y:y + h, x:x + w]
+        return image[y:y + h, x:x + w]
 
 
 def load_images(path):
@@ -76,11 +62,10 @@ def load_images_to_db(path):
         for subdirname in dirnames:
             subject_path = os.path.join(dirname, subdirname)
             label = Label.get_or_create(name=subdirname)[0]
-            print label
             label.save()
             for filename in os.listdir(subject_path):
                 path = os.path.abspath(os.path.join(subject_path, filename))
-                logging.info('saving path %s' % path)
+                # logging.info('saving path %s' % path)
                 image = Image.get_or_create(path=path, label=label)[0]
                 image.save()
 
@@ -132,54 +117,6 @@ def predict(cv_image):
             }
         }
     return result
-
-
-db = SqliteDatabase("data/images.db")
-
-
-class BaseModel(Model):
-    class Meta:
-        database = db
-
-
-class Label(BaseModel):
-    IMAGE_DIR = "data/images"
-
-    name = CharField()
-
-    def persist(self):
-        path = os.path.join(self.IMAGE_DIR, self.name)
-        # if directory exists with 10 images
-        # delete it and recreate
-        if os.path.exists(path) and len(os.listdir(path)) >= 10:
-            shutil.rmtree(path)
-
-        if not os.path.exists(path):
-            logging.info("Created directory: %s" % self.name)
-            os.makedirs(path)
-
-        Label.get_or_create(name=self.name)
-
-
-class Image(BaseModel):
-    IMAGE_DIR = "data/images"
-    path = CharField()
-    label = ForeignKeyField(Label)
-
-    def persist(self, cv_image):
-        path = os.path.join(self.IMAGE_DIR, self.label.name)
-        nr_of_images = len(os.listdir(path))
-        if nr_of_images >= 10:
-            return 'Done'
-        faces = detect_faces(cv_image)
-        if len(faces) > 0 and nr_of_images < 10:
-            path += "/%s.jpg" % nr_of_images
-            path = os.path.abspath(path)
-            logging.info("Saving %s" % path)
-            cropped = to_grayscale(crop_faces(cv_image, faces))
-            cv2.imwrite(path, cropped)
-            self.path = path
-            self.save()
 
 
 if __name__ == "__main__":

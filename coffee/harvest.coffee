@@ -1,7 +1,7 @@
 onError = (e) -> console.log "Rejected", e
 
 onSuccess = (localMediaStream) ->
-  video.src = webkitURL.createObjectURL(localMediaStream)
+  video.src = URL.createObjectURL(localMediaStream)
   setInterval(update, 250) 
 
 setupWS = (url, close) ->

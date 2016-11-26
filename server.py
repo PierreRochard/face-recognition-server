@@ -1,4 +1,4 @@
-import StringIO
+from StringIO import StringIO
 import json
 import logging
 import os
@@ -43,7 +43,8 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         logging.info('new connection')
 
     def on_message(self, message):
-        image = Image.open(StringIO.StringIO(message))
+        message_file_object = StringIO(message)
+        image = Image.open(message_file_object)
         cv_image = numpy.array(image)
         self.process(cv_image)
 
@@ -84,16 +85,16 @@ class HarvestHandler(SocketHandler):
             self.write_message(json.dumps(result))
 
 
-class TrainHandler(tornado.web.RequestHandler):
-    def post(self):
-        image_functions.train()
-
-
 class PredictHandler(SocketHandler):
     def process(self, cv_image):
         result = image_functions.predict(cv_image)
         if result:
             self.write_message(json.dumps(result))
+
+
+class TrainHandler(tornado.web.RequestHandler):
+    def post(self):
+        image_functions.train()
 
 
 def main():

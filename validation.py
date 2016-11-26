@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn import cross_validation as cval
 from sklearn.metrics import precision_score
-import opencv
+import image_functions
 
 
 def read_images(path, sz=None):
@@ -65,7 +65,7 @@ class FaceRecognizer(BaseEstimator):
 if __name__ == "__main__":
     # [X, y] = read_images(sys.argv[1], (100,100))
 
-    [X, y] = opencv.load_images_from_db()
+    [X, y] = image_functions.load_images_from_db()
     y = np.asarray(y, dtype=np.int32)
     cv = cval.StratifiedKFold(y, 10)
 

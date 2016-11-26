@@ -23,7 +23,11 @@ def detect_faces(image):
 
 
 def to_grayscale(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    try:
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    except TypeError:
+        print image
+        raise
     gray = cv2.equalizeHist(gray)
     return gray
 

@@ -55,3 +55,5 @@ Copy `haarcascade_frontalface_alt.xml` from `<path to opencv source>/data/haarca
 
 Run with `python server.py` and browse to http://localhost:8888 when the model has been trained.
 
+cd coffee
+coffee -c -o ../static/scripts/ harvest.coffee

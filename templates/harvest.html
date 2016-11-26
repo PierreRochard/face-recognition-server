@@ -2,8 +2,11 @@
 
 {% block content %}
 <div class="page-header">
-  <h1>Opencv, Webrtc, Python and Websockets</h1>
+  <h1>
+      OpenCV, WebRTC, Python and WebSockets
+  </h1>
 </div>
+
 <div class="row">
   <div class="span5">
     <!--video id="live" width="320" height="240" autoplay></video -->
@@ -13,12 +16,18 @@
   <div class="span5">
     <div id="train">
       <form id="input" class="form-horizontal">
-          <label for="name">I dont seem to recognize you, whats your name?</label>
+          <label for="name">
+              I dont seem to recognize you, whats your name?
+          </label>
           <input type="text" name="name" id="name" value="" />
-          <button type="submit" class="btn" id="start">Ok</button>
+          <button type="submit" class="btn" id="start">
+              Ok
+          </button>
       </form>
       <div id="training" class="progress progress-striped active">
-        <div class="bar" style="width: 20%;">Saving images...</div>
+        <div class="bar" style="width: 20%;">
+            Saving images...
+        </div>
       </div>
     </div>
     <div id="predict">
@@ -26,10 +35,12 @@
       <pre class="prettyprint">
       </pre>
       <label class="checkbox">
-        <input type="checkbox" id="show-face" />Show face?
+        <input type="checkbox" id="show-face" />
+          Show face?
        </label>
       <label class="checkbox">
-        <input type="checkbox" id="keep-predicting" />Keep predicting (don't retrain)?
+        <input type="checkbox" id="keep-predicting" />
+          Keep predicting (don't retrain)?
        </label>
     </div>
   </div>
